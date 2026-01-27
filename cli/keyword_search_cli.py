@@ -18,6 +18,10 @@ def main() -> None:
     idf_parser = subparsers.add_parser("idf", help="Display document frequency based on term")
     idf_parser.add_argument("term", type=str, help="Term to display frequency")
 
+    tfidf_parser = subparsers.add_parser("tfidf", help="Display word relevancy for term")
+    tfidf_parser.add_argument("doc_id", type=int, help="Id document")
+    tfidf_parser.add_argument("term", type=str, help="Term to display relevancy")
+
     search_parser = subparsers.add_parser("search", help="Search movies using BM25")
     search_parser.add_argument("query", type=str, help="Search query")
 
@@ -42,6 +46,13 @@ def main() -> None:
             print("term: ", args.term)
             idf = idf_command(args.term)
             print(f"Inverse document frequency of '{args.term}': {idf:.2f}")
+        case "tfidf":
+            print("doc_id: ", args.doc_id)
+            print("term: ", args.term)
+            tf = tf_command(args.doc_id, args.term)
+            idf = idf_command(args.term)
+            tf_idf = tf * idf
+            print(f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tf_idf:.2f}")
 
 
         case _:
