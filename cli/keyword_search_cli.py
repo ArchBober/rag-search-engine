@@ -2,7 +2,7 @@
 
 import argparse
 
-from lib.keyword_search import build_command, search_command, tf_command
+from lib.keyword_search import build_command, search_command, tf_command, idf_command
 
 
 def main() -> None:
@@ -14,6 +14,9 @@ def main() -> None:
     tf_parser = subparsers.add_parser("tf", help="Display word counter")
     tf_parser.add_argument("doc_id", type=int, help="Id document")
     tf_parser.add_argument("term", type=str, help="Term to display frequency")
+
+    idf_parser = subparsers.add_parser("idf", help="Display document frequency based on term")
+    idf_parser.add_argument("term", type=str, help="Term to display frequency")
 
     search_parser = subparsers.add_parser("search", help="Search movies using BM25")
     search_parser.add_argument("query", type=str, help="Search query")
@@ -35,6 +38,11 @@ def main() -> None:
             print("term: ", args.term)
             frq = tf_command(args.doc_id, args.term)
             print("Frequency: ", frq)
+        case "idf":
+            print("term: ", args.term)
+            idf = idf_command(args.term)
+            print(f"Inverse document frequency of '{args.term}': {idf:.2f}")
+
 
         case _:
             parser.print_help()

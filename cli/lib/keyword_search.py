@@ -1,6 +1,7 @@
 import os
 import pickle
 import string
+import math
 from collections import defaultdict, Counter
 
 from nltk.stem import PorterStemmer
@@ -78,6 +79,18 @@ def tf_command(doc_id: int, term: str) -> int:
     idx = InvertedIndex()
     idx.load()
     return idx.get_tf(doc_id, term)
+
+def idf_command(term: str) -> int:
+    idx = InvertedIndex()
+    idx.load()
+
+    token = tokenize_text(term)
+    if len(token) != 1:
+        raise Exception("Too much words")
+    token = token[0]
+    doc_frq_match = len(idx.index[token])
+    total_doc_count = len(idx.docmap)
+    return math.log((total_doc_count + 1) / (doc_frq_match + 1))
 
 
 
