@@ -14,6 +14,5 @@ def load_movies() -> list[dict]:
 
 def load_stop_words() -> list[dict]:
     with open(PATH_STOP_WORDS, "r") as f:
-        data = f.readlines()
-    data = [line.rstrip("\n") for line in data]
+        data = f.read().splitlines()
     return data
