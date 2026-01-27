@@ -61,6 +61,20 @@ class InvertedIndex:
             raise Exception("Too much words")
         token = token[0]
         return self.term_frequencies[doc_id][token]
+    
+    def get_idf(self, term: str) -> float:
+        tokens = tokenize_text(term)
+        if len(tokens) != 1:
+            raise ValueError("term must be a single token")
+        token = tokens[0]
+        doc_count = len(self.docmap)
+        term_doc_count = len(self.index[token])
+        return math.log((doc_count + 1) / (term_doc_count + 1))
+
+    def get_tf_idf(self, doc_id: int, term: str) -> float:
+        tf = self.get_tf(doc_id, term)
+        idf = self.get_idf(term)
+        return tf * idf
 
     def __add_document(self, doc_id: int, text: str) -> None:
         tokens = tokenize_text(text)
@@ -80,19 +94,16 @@ def tf_command(doc_id: int, term: str) -> int:
     idx.load()
     return idx.get_tf(doc_id, term)
 
-def idf_command(term: str) -> int:
+def idf_command(term: str) -> float:
     idx = InvertedIndex()
     idx.load()
-
-    token = tokenize_text(term)
-    if len(token) != 1:
-        raise Exception("Too much words")
-    token = token[0]
-    doc_frq_match = len(idx.index[token])
-    total_doc_count = len(idx.docmap)
-    return math.log((total_doc_count + 1) / (doc_frq_match + 1))
+    return idx.get_idf(term)
 
 
+def tfidf_command(doc_id: int, term: str) -> float:
+    idx = InvertedIndex()
+    idx.load()
+    return idx.get_tf_idf(doc_id, term)
 
 
 def search_command(query: str, limit: int = DEFAULT_SEARCH_LIMIT) -> list[dict]:

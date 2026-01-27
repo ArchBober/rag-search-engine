@@ -2,7 +2,13 @@
 
 import argparse
 
-from lib.keyword_search import build_command, search_command, tf_command, idf_command
+from lib.keyword_search import (
+    build_command, 
+    search_command, 
+    tf_command, 
+    idf_command,
+    tfidf_command
+)
 
 
 def main() -> None:
@@ -49,11 +55,10 @@ def main() -> None:
         case "tfidf":
             print("doc_id: ", args.doc_id)
             print("term: ", args.term)
-            tf = tf_command(args.doc_id, args.term)
-            idf = idf_command(args.term)
-            tf_idf = tf * idf
-            print(f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tf_idf:.2f}")
-
+            tf_idf = tfidf_command(args.doc_id, args.term)
+            print(
+                f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tf_idf:.2f}"
+            )
 
         case _:
             parser.print_help()
