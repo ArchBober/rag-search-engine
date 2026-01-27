@@ -1,6 +1,9 @@
 import string
 
-from .search_utils import DEFAULT_SEARCH_LIMIT, load_movies
+from .search_utils import DEFAULT_SEARCH_LIMIT, load_movies, load_stop_words
+
+stop_words = load_stop_words()
+
 
 
 def search_command(query: str, limit: int = DEFAULT_SEARCH_LIMIT) -> list[dict]:
@@ -30,10 +33,19 @@ def preprocess_text(text: str) -> str:
     text = text.translate(str.maketrans("", "", string.punctuation))
     return text
 
+def remove_stop_tokens(tokens: list[str]) -> list[str]:
+    valid_tokens = []
+    for token in tokens:
+        if token in stop_words:
+            continue
+        valid_tokens.append(token)
+    return valid_tokens
+
 
 def tokenize_text(text: str) -> list[str]:
     text = preprocess_text(text)
     tokens = text.split()
+    tokens = remove_stop_tokens(tokens)
     valid_tokens = []
     for token in tokens:
         if token:
