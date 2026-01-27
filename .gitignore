@@ -11,3 +11,4 @@ wheels/
 
 data
 .python-version
+cache/
