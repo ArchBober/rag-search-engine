@@ -1,7 +1,7 @@
 import os
 import pickle
 import string
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from nltk.stem import PorterStemmer
 
@@ -20,8 +20,10 @@ class InvertedIndex:
     def __init__(self) -> None:
         self.index = defaultdict(set)
         self.docmap: dict[int, dict] = {}
+        self.term_frequencies: dict[int, Counter] = defaultdict(Counter)
         self.index_path = os.path.join(CACHE_DIR, "index.pkl")
         self.docmap_path = os.path.join(CACHE_DIR, "docmap.pkl")
+        self.term_frequencies_path = os.path.join(CACHE_DIR, "term_frequencies.pkl")
 
     def build(self) -> None:
         movies = load_movies()
@@ -37,27 +39,45 @@ class InvertedIndex:
             pickle.dump(self.index, f)
         with open(self.docmap_path, "wb") as f:
             pickle.dump(self.docmap, f)
+        with open(self.term_frequencies_path, "wb") as f:
+            pickle.dump(self.term_frequencies, f)
 
     def load(self) -> None:
         with open(self.index_path, "rb") as f:
             self.index = pickle.load(f)
         with open(self.docmap_path, "rb") as f:
             self.docmap = pickle.load(f)
+        with open(self.term_frequencies_path, "rb") as f:
+            self.term_frequencies = pickle.load(f)
 
     def get_documents(self, term: str) -> list[int]:
         doc_ids = self.index.get(term, set())
         return sorted(list(doc_ids))
 
+    def get_tf(self, doc_id: int, term: str)-> int:
+        token = tokenize_text(term)
+        if len(token) != 1:
+            raise Exception("Too much words")
+        token = token[0]
+        return self.term_frequencies[doc_id][token]
+
     def __add_document(self, doc_id: int, text: str) -> None:
         tokens = tokenize_text(text)
         for token in set(tokens):
             self.index[token].add(doc_id)
+        for token in tokens:
+            self.term_frequencies[doc_id][token] += 1
 
 
 def build_command() -> None:
     idx = InvertedIndex()
     idx.build()
     idx.save()
+
+def tf_command(doc_id: int, term: str) -> int:
+    idx = InvertedIndex()
+    idx.load()
+    return idx.get_tf(doc_id, term)
 
 
 
