@@ -2,6 +2,7 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import os
 import math
+import re
 
 from .search_utils import CACHE_DIR, DEFAULT_SEARCH_LIMIT, load_movies
 
@@ -175,5 +176,24 @@ def chunk(text: str, chunk_size: int = 200, overlap: int = 0) -> None:
     else:
         chunks = overlap_size_chunking(text, chunk_size, overlap)
     print(f"Chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")
+
+def semantic_chunk(text: str, chunk_size: int = 200, overlap: int = 0):
+    words = re.split(r"(?<=[.!?])\s+", text)
+    chunks = []
+
+    n_words = len(words)
+    i = 0
+    ov = 0
+    while i < n_words:
+        if overlap != 0:
+            ov = 0 if i == 0 else overlap
+        
+        chunk_words = words[i-ov : i + chunk_size-ov]
+        chunks.append(" ".join(chunk_words))
+        i += chunk_size-ov
+
+    print(f"Semantically chunking {len(text)} characters")
     for i, chunk in enumerate(chunks):
         print(f"{i + 1}. {chunk}")
