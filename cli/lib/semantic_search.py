@@ -4,7 +4,8 @@ import os
 import math
 import re
 
-from .search_utils import CACHE_DIR, DEFAULT_SEARCH_LIMIT, load_movies
+from .search_utils import DEFAULT_CHUNK_OVERLAP, DEFAULT_SEMANTIC_CHUNK_SIZE, CACHE_DIR, DEFAULT_SEARCH_LIMIT, load_movies
+
 
 class SemanticSearch:
     def __init__(self, model_name="all-MiniLM-L6-v2"):
@@ -180,7 +181,15 @@ def chunk(text: str, chunk_size: int = 200, overlap: int = 0) -> None:
         print(f"{i + 1}. {chunk}")
 
 def semantic_chunk(text: str, max_chunk_size: int = 200, overlap: int = 0):
-    words = re.split(r"(?<=[.!?])\s+", text)
+    cleaned_text = text.strip()
+    if not cleaned_text:
+        return []
+    
+    words = re.split(r"(?<=[.!?])\s+", cleaned_text)
+
+    if len(words) == 1 and not words[0].endswith(('.', '!', '?')):
+        return words
+
     chunks = []
 
     n_words = len(words)
@@ -191,7 +200,21 @@ def semantic_chunk(text: str, max_chunk_size: int = 200, overlap: int = 0):
             ov = 0 if i == 0 else overlap
         
         chunk_words = words[i-ov : i + max_chunk_size-ov]
+        for y, ch in enumerate(chunk_words):
+            if not chunk_words[y].strip():
+                continue
+            chunk_words[y] = chunk_words[y].strip() 
         chunks.append(" ".join(chunk_words))
         i += max_chunk_size-ov
 
     return chunks
+
+def semantic_chunk_text(
+    text: str,
+    max_chunk_size: int = DEFAULT_SEMANTIC_CHUNK_SIZE,
+    overlap: int = DEFAULT_CHUNK_OVERLAP,
+) -> None:
+    chunks = semantic_chunk(text, max_chunk_size, overlap)
+    print(f"Semantically chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")

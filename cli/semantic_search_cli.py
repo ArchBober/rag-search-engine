@@ -1,6 +1,6 @@
 
 import argparse
-from lib.semantic_search import semantic_chunk, chunk, search, verify_model, embed_text, verify_embeddings, embed_query_text
+from lib.semantic_search import semantic_chunk_text, chunk, search, verify_model, embed_text, verify_embeddings, embed_query_text
 from lib.chunked_semantic_search import embed_chunks_command, search_chunked_command
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
@@ -52,7 +52,7 @@ def main():
         case "chunk":
             chunk(args.chunk, args.chunk_size, args.overlap)
         case "semantic_chunk":
-            semantic_chunk(args.chunk, args.max_chunk_size, args.overlap)
+            semantic_chunk_text(args.chunk, args.max_chunk_size, args.overlap)
         case "embed_chunks":
             embeddings = embed_chunks_command()
             print(f"Generated {len(embeddings)} chunked embeddings")
