@@ -138,16 +138,42 @@ def verify_model() -> None:
     print(f"Max sequence length: {ss.model.max_seq_length}")
 
 
-def chunk(chunk: string, chunk_size: int=200):
-    words = chunk.split(" ")
-    chunks = []
-    chunks_count = math.ceil(len(words)/chunk_size)
-    for i in range(chunks_count):
-        if i==chunks_count:
-            chunks.append(" ".join(words[i*chunk_size:]))
-        else:
-            chunks.append(" ".join(words[i*chunk_size:(i+1)*chunk_size]))
 
-    print(f"Chunking {len(chunk)} characters")
-    for i, ch in enumerate(chunks, 1):
-        print(f"{i}. {ch}")
+def fixed_size_chunking(text: str, chunk_size: int = 200) -> list[str]:
+    words = text.split()
+    chunks = []
+
+    n_words = len(words)
+    i = 0
+    while i < n_words:
+        chunk_words = words[i : i + chunk_size]
+        chunks.append(" ".join(chunk_words))
+        i += chunk_size
+
+    return chunks
+
+def overlap_size_chunking(text: str, chunk_size: int = 200, overlap: int = 0) -> list[str]:
+    words = text.split()
+    chunks = []
+
+    n_words = len(words)
+    i = 0
+    while i < n_words:
+        
+        ov = 0 if i == 0 else overlap
+        
+        chunk_words = words[i-ov : i + chunk_size-ov]
+        chunks.append(" ".join(chunk_words))
+        i += chunk_size-ov
+
+    return chunks
+
+
+def chunk(text: str, chunk_size: int = 200, overlap: int = 0) -> None:
+    if overlap == 0:
+        chunks = fixed_size_chunking(text, chunk_size)
+    else:
+        chunks = overlap_size_chunking(text, chunk_size, overlap)
+    print(f"Chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")
