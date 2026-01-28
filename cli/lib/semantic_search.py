@@ -7,8 +7,8 @@ import re
 from .search_utils import CACHE_DIR, DEFAULT_SEARCH_LIMIT, load_movies
 
 class SemanticSearch:
-    def __init__(self) -> None:
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+    def __init__(self, model_name="all-MiniLM-L6-v2"):
+        self.model = SentenceTransformer(model_name)
         self.embeddings = None
         self.documents = None
         self.document_map = {}
@@ -194,6 +194,8 @@ def semantic_chunk(text: str, chunk_size: int = 200, overlap: int = 0):
         chunks.append(" ".join(chunk_words))
         i += chunk_size-ov
 
-    print(f"Semantically chunking {len(text)} characters")
-    for i, chunk in enumerate(chunks):
-        print(f"{i + 1}. {chunk}")
+    # print(f"Semantically chunking {len(text)} characters")
+    # for i, chunk in enumerate(chunks):
+    #     print(f"{i + 1}. {chunk}")
+
+    return chunks

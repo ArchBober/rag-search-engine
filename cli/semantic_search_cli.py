@@ -1,7 +1,7 @@
 
 import argparse
 from lib.semantic_search import semantic_chunk, chunk, search, verify_model, embed_text, verify_embeddings, embed_query_text
-
+from lib.chunked_semantic_search import embed_chunks
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
 
@@ -30,6 +30,8 @@ def main():
     semantic_chunk_parser.add_argument("--max-chunk-size", nargs='?', default=200, type=int, help="Limit chunk size")
     semantic_chunk_parser.add_argument("--overlap", nargs='?', default=0, type=int, help="Overlap chunk")
 
+    embed_chunks_parser = subparsers.add_parser("embed_chunks", help="Semantic chunk text")
+
 
     args = parser.parse_args()
 
@@ -48,6 +50,8 @@ def main():
             chunk(args.chunk, args.chunk_size, args.overlap)
         case "semantic_chunk":
             semantic_chunk(args.chunk, args.max_chunk_size, args.overlap)
+        case "embed_chunks":
+            embed_chunks()
         case _:
             parser.print_help()
 
