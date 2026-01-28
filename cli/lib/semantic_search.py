@@ -13,7 +13,7 @@ class SemanticSearch:
         self.embeddings_path = os.path.join(CACHE_DIR, "movie_embeddings.npy")
 
     def generate_embedding(self, text: str) -> str:
-        if not text.strip():
+        if not text or not text.strip():
             raise ValueError("empty text")
 
         text_input = [text]
@@ -45,13 +45,21 @@ class SemanticSearch:
         np.save(self.embeddings_path, self.embeddings)
         return self.embeddings
 
+def embed_query_text(query):
+    ss = SemanticSearch()
+    embedding = ss.generate_embedding(query)
+    print(f"Query: {query}")
+    print(f"First 5 dimensions: {embedding[:5]}")
+    print(f"Shape: {embedding.shape}")
+
 def verify_embeddings():
     ss = SemanticSearch()
     documents = load_movies()
     embeddings = ss.load_or_create_embeddings(documents)
     print(f"Number of docs:   {len(documents)}")
     print(f"Embeddings shape: {embeddings.shape[0]} vectors in {embeddings.shape[1]} dimensions")
-    
+
+
 def embed_text(text: str):
     ss = SemanticSearch()
     embedding = ss.generate_embedding(text)
