@@ -1,6 +1,7 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import os
+import math
 
 from .search_utils import CACHE_DIR, DEFAULT_SEARCH_LIMIT, load_movies
 
@@ -44,6 +45,7 @@ class SemanticSearch:
         self.embeddings = self.model.encode(docs_desc, show_progress_bar=True)
         np.save(self.embeddings_path, self.embeddings)
         return self.embeddings
+
 
     def search(self, query, limit=DEFAULT_SEARCH_LIMIT):
         if self.embeddings is None or self.embeddings.size == 0:
@@ -134,3 +136,18 @@ def verify_model() -> None:
     ss = SemanticSearch()
     print(f"Model loaded: {ss.model}")
     print(f"Max sequence length: {ss.model.max_seq_length}")
+
+
+def chunk(chunk: string, chunk_size: int=200):
+    words = chunk.split(" ")
+    chunks = []
+    chunks_count = math.ceil(len(words)/chunk_size)
+    for i in range(chunks_count):
+        if i==chunks_count:
+            chunks.append(" ".join(words[i*chunk_size:]))
+        else:
+            chunks.append(" ".join(words[i*chunk_size:(i+1)*chunk_size]))
+
+    print(f"Chunking {len(chunk)} characters")
+    for i, ch in enumerate(chunks, 1):
+        print(f"{i}. {ch}")
