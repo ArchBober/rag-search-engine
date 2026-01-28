@@ -2,7 +2,7 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import os
 
-from .search_utils import CACHE_DIR, load_movies
+from .search_utils import CACHE_DIR, DEFAULT_SEARCH_LIMIT, load_movies
 
 class SemanticSearch:
     def __init__(self) -> None:
@@ -45,37 +45,54 @@ class SemanticSearch:
         np.save(self.embeddings_path, self.embeddings)
         return self.embeddings
 
-    def search(self, query, limit = 5):
-        if len(self.embeddings) == 0:
-            raise ValueError("No embeddings loaded. Call `load_or_create_embeddings` first.")
-        embedding = self.generate_embedding(query)
+    def search(self, query, limit=DEFAULT_SEARCH_LIMIT):
+        if self.embeddings is None or self.embeddings.size == 0:
+            raise ValueError(
+                "No embeddings loaded. Call `load_or_create_embeddings` first."
+            )
 
-        results_score = []
-        result = []
-        for idx, doc_emb in enumerate(self.embeddings):
-            cossim = cosine_similarity(doc_emb, embedding)
-            results_score.append((cossim, self.document_map[self.documents[idx]['id']]))
+        if self.documents is None or len(self.documents) == 0:
+            raise ValueError(
+                "No documents loaded. Call `load_or_create_embeddings` first."
+            )
 
-        result_sorted = sorted(results_score, key=lambda x: x[0], reverse=True)[:limit]
+        query_embedding = self.generate_embedding(query)
 
-        for res in result_sorted:
-            result_dict = {}
-            result_dict["score"] = res[0]
-            result_dict["title"] = res[1]["title"]
-            result_dict["description"] = res[1]["description"]
-            result.append(result_dict)
+        similarities = []
+        for i, doc_embedding in enumerate(self.embeddings):
+            similarity = cosine_similarity(query_embedding, doc_embedding)
+            similarities.append((similarity, self.documents[i]))
+
+        similarities.sort(key=lambda x: x[0], reverse=True)
+
+        results = []
+        for score, doc in similarities[:limit]:
+            results.append(
+                {
+                    "score": score,
+                    "title": doc["title"],
+                    "description": doc["description"],
+                }
+            )
+
+        return results
 
 
-        return result
-
-
-def search(query: str, limit: int=5):
-    ss = SemanticSearch()
+def search(query, limit=DEFAULT_SEARCH_LIMIT):
+    search_instance = SemanticSearch()
     documents = load_movies()
-    embeddings = ss.load_or_create_embeddings(documents)
-    results = ss.search(query, limit)
-    for idx, res in enumerate(results, 1):
-        print(f"{idx}. {res["title"]} ({res["score"]})\n{res["description"]}")
+    search_instance.load_or_create_embeddings(documents)
+
+    results = search_instance.search(query, limit)
+
+    print(f"Query: {query}")
+    print(f"Top {len(results)} results:")
+    print()
+
+    for i, result in enumerate(results, 1):
+        print(f"{i}. {result['title']} (score: {result['score']:.4f})")
+        print(f"   {result['description'][:100]}...")
+        print()
 
 
 def cosine_similarity(vec1, vec2):
