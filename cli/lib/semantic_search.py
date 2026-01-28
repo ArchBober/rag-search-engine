@@ -179,7 +179,7 @@ def chunk(text: str, chunk_size: int = 200, overlap: int = 0) -> None:
     for i, chunk in enumerate(chunks):
         print(f"{i + 1}. {chunk}")
 
-def semantic_chunk(text: str, chunk_size: int = 200, overlap: int = 0):
+def semantic_chunk(text: str, max_chunk_size: int = 200, overlap: int = 0):
     words = re.split(r"(?<=[.!?])\s+", text)
     chunks = []
 
@@ -190,12 +190,8 @@ def semantic_chunk(text: str, chunk_size: int = 200, overlap: int = 0):
         if overlap != 0:
             ov = 0 if i == 0 else overlap
         
-        chunk_words = words[i-ov : i + chunk_size-ov]
+        chunk_words = words[i-ov : i + max_chunk_size-ov]
         chunks.append(" ".join(chunk_words))
-        i += chunk_size-ov
-
-    # print(f"Semantically chunking {len(text)} characters")
-    # for i, chunk in enumerate(chunks):
-    #     print(f"{i + 1}. {chunk}")
+        i += max_chunk_size-ov
 
     return chunks

@@ -1,7 +1,7 @@
 
 import argparse
 from lib.semantic_search import semantic_chunk, chunk, search, verify_model, embed_text, verify_embeddings, embed_query_text
-from lib.chunked_semantic_search import embed_chunks
+from lib.chunked_semantic_search import embed_chunks_command, search_chunked_command
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
 
@@ -32,6 +32,9 @@ def main():
 
     embed_chunks_parser = subparsers.add_parser("embed_chunks", help="Semantic chunk text")
 
+    search_chunked_parser = subparsers.add_parser("search_chunked", help="Search using chunked embeddings")
+    search_chunked_parser.add_argument("query", type=str, help="Search query")
+    search_chunked_parser.add_argument("--limit", type=int, default=5, help="Number of results to return")
 
     args = parser.parse_args()
 
@@ -51,7 +54,15 @@ def main():
         case "semantic_chunk":
             semantic_chunk(args.chunk, args.max_chunk_size, args.overlap)
         case "embed_chunks":
-            embed_chunks()
+            embeddings = embed_chunks_command()
+            print(f"Generated {len(embeddings)} chunked embeddings")
+        case "search_chunked":
+            result = search_chunked_command(args.query, args.limit)
+            print(f"Query: {result['query']}")
+            print("Results:")
+            for i, res in enumerate(result["results"], 1):
+                print(f"\n{i}. {res['title']} (score: {res['score']:.4f})")
+                print(f"   {res['document']}...")
         case _:
             parser.print_help()
 
