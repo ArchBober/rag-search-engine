@@ -6,7 +6,7 @@ from lib.hybrid_search import (
 
 from lib.search_utils import show_structure
 
-from lib.augmented_generation import rag, summarize, citation
+from lib.augmented_generation import rag, summarize, citation, question
 
 def main():
     parser = argparse.ArgumentParser(description="Retrieval Augmented Generation CLI")
@@ -30,6 +30,14 @@ def main():
     )
     citations_parser.add_argument("query", type=str, help="Search query for RAG")
     citations_parser.add_argument(
+        "--limit", type=int, default=5, help="Number of results to return (default=5)"
+    )
+
+    question_parser = subparsers.add_parser(
+        "question", help="Use LLM to question"
+    )
+    question_parser.add_argument("query", type=str, help="Search query for RAG")
+    question_parser.add_argument(
         "--limit", type=int, default=5, help="Number of results to return (default=5)"
     )
 
@@ -70,6 +78,18 @@ def main():
 
             response = citation(query, results["results"])
             print("LLM Answer:")
+            print(response)
+        case "question":
+            query = args.query
+            limit = args.limit
+            results = rrf_search_command(query, limit=limit)
+
+            print("Search Results:")
+            for doc in results['results']:
+                print(f" - {doc["title"]}")
+
+            response = question(query, results["results"])
+            print("Answer:")
             print(response)
         case _:
             parser.print_help()
