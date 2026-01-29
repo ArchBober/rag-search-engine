@@ -52,7 +52,7 @@ def main() -> None:
         "--limit", type=int, default=5, help="Number of results to return (default=5)"
     )
     rrf_parser.add_argument(
-        "--rerank-method", type=str,choices=["individual"], help="Number of results to return (default=5)"
+        "--rerank-method", type=str,choices=["individual", "batch"], help="Number of results to return (default=5)"
     )
 
     args = parser.parse_args()
