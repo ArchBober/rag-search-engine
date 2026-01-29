@@ -1,5 +1,8 @@
 import json
 import os
+from typing import Any
+
+DEFAULT_ALPHA = 0.5
 
 DEFAULT_SEARCH_LIMIT = 5
 DOCUMENT_PREVIEW_LENGTH = 100
@@ -8,10 +11,10 @@ SCORE_PRECISION = 3
 BM25_K1 = 1.5
 BM25_B = 0.75
 
-
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-PATH_MOVIES = os.path.join(PROJECT_ROOT, "data", "movies.json")
-PATH_STOP_WORDS = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
+DATA_PATH = os.path.join(PROJECT_ROOT, "data", "movies.json")
+STOPWORDS_PATH = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
+
 CACHE_DIR = os.path.join(PROJECT_ROOT, "cache")
 
 DEFAULT_CHUNK_SIZE = 200
@@ -24,14 +27,15 @@ CHUNK_METADATA_PATH = os.path.join(CACHE_DIR, "chunk_metadata.json")
 
 
 def load_movies() -> list[dict]:
-    with open(PATH_MOVIES, "r") as f:
+    with open(DATA_PATH, "r") as f:
         data = json.load(f)
     return data["movies"]
 
-def load_stop_words() -> list[dict]:
-    with open(PATH_STOP_WORDS, "r") as f:
-        data = f.read().splitlines()
-    return data
+
+def load_stopwords() -> list[str]:
+    with open(STOPWORDS_PATH, "r") as f:
+        return f.read().splitlines()
+
 
 def format_search_result(
     doc_id: str, title: str, document: str, score: float, **metadata: Any
@@ -55,3 +59,46 @@ def format_search_result(
         "score": round(score, SCORE_PRECISION),
         "metadata": metadata if metadata else {},
     }
+
+def show_structure(obj, indent: int=0) -> None:
+    """Print a concise outline of a dict or list:
+    - keys with value types
+    - list lengths and each element’s type (and recurse for dicts)"""
+    pad = " " * indent
+
+    # ----- handle dict -------------------------------------------------
+    if isinstance(obj, dict):
+        for key, val in obj.items():
+            if isinstance(val, dict):
+                print(f"{pad}{key!r}: dict")
+                show_structure(val, indent + 4)
+            elif isinstance(val, list):
+                print(f"{pad}{key!r}: list[{len(val)}]")
+                for i, item in enumerate(val):
+                    sub_pad = " " * (indent + 4)
+                    if isinstance(item, dict):
+                        print(f"{sub_pad}[{i}] dict")
+                        show_structure(item, indent + 8)
+                    elif isinstance(item, list):
+                        print(f"{sub_pad}[{i}] list[{len(item)}]")
+                    else:
+                        print(f"{sub_pad}[{i}] {type(item).__name__}")
+            else:
+                print(f"{pad}{key!r}: {type(val).__name__}")
+
+    # ----- handle list -------------------------------------------------
+    elif isinstance(obj, list):
+        print(f"{pad}list[{len(obj)}]")
+        for i, item in enumerate(obj):
+            sub_pad = " " * (indent + 4)
+            if isinstance(item, dict):
+                print(f"{sub_pad}[{i}] dict")
+                show_structure(item, indent + 8)
+            elif isinstance(item, list):
+                print(f"{sub_pad}[{i}] list[{len(item)}]")
+            else:
+                print(f"{sub_pad}[{i}] {type(item).__name__}")
+
+    # ----- fallback for other types ------------------------------------
+    else:
+        print(f"{pad}{type(obj).__name__}")
