@@ -2,6 +2,8 @@ import json
 import os
 from typing import Any
 
+SEARCH_MULTIPLIER = 5
+
 DEFAULT_ALPHA = 0.5
 RRF_K = 60
 
