@@ -1,15 +1,21 @@
-
-
 import argparse
 
+from lib.hybrid_search import normalize
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Hybrid Search CLI")
-    parser.add_subparsers(dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    normalize_parser = subparsers.add_parser("normalize", help="Normalize list")
+    normalize_parser.add_argument("list", type=float,nargs="+", help="List")
 
     args = parser.parse_args()
 
     match args.command:
+        case "normalize":
+            normvals = normalize(args.list)
+            for norm in normvals:
+                print(f"* {norm:.4f}")
         case _:
             parser.print_help()
 
