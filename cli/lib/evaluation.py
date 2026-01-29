@@ -51,11 +51,13 @@ def evaluate_command(limit: int = 5) -> dict:
 
         precision = precision_at_k(retrieved_docs, relevant_docs, limit)
         recall = recall_at_k(retrieved_docs, relevant_docs, limit)
+        f1score = 2 * (precision * recall) / (precision + recall) if precision + recall != 0 else 0.0 
 
         results_by_query[query] = {
             "precision": precision,
             "recall": recall,
             "retrieved": retrieved_docs[:limit],
+            "f1score": f1score,
             "relevant": list(relevant_docs),
         }
 
