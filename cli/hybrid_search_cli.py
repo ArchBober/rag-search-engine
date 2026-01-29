@@ -51,6 +51,9 @@ def main() -> None:
     rrf_parser.add_argument(
         "--limit", type=int, default=5, help="Number of results to return (default=5)"
     )
+    rrf_parser.add_argument(
+        "--rerank-method", type=str,choices=["individual", ""], default="", help="Number of results to return (default=5)"
+    )
 
     args = parser.parse_args()
 
@@ -79,7 +82,11 @@ def main() -> None:
                 print(f"   {res['document'][:100]}...")
                 print()
         case "rrf-search":
-            result = rrf_search_command(args.query, args.k, args.enhance, args.limit)
+            limit = args.limit*5 if args.rerank_method == "individual" else args.limit
+            result = rrf_search_command(args.query, args.k, args.enhance,args.rerank_method, limit)
+
+            if result["enhanced_query"]:
+                result = result[args.limit]
 
             if result["enhanced_query"]:
                 print(

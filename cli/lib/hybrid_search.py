@@ -11,6 +11,7 @@ from .search_utils import (
     load_movies,
 )
 from .semantic_search import ChunkedSemanticSearch
+from .rerank_results import rerank_results
 
 
 class HybridSearch:
@@ -205,6 +206,7 @@ def rrf_search_command(
     query: str,
     k: int = RRF_K,
     enhance: Optional[str] = None,
+    rerank: Optional[str] = None,
     limit: int = DEFAULT_SEARCH_LIMIT,
 ) -> dict:
     movies = load_movies()
@@ -219,11 +221,19 @@ def rrf_search_command(
     search_limit = limit
     results = searcher.rrf_search(query, k, search_limit)
 
+    original_results = results
+    reranked_results = None
+    if rerank:
+        reranked_results = rerank_results(query, results, rerank)
+        results = reranked_results
+
     return {
         "original_query": original_query,
         "enhanced_query": enhanced_query,
         "enhance_method": enhance,
         "query": query,
         "k": k,
+        "original_results": original_results,
+        "reranked_results": reranked_results,
         "results": results,
     }
