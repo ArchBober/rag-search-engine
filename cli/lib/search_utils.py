@@ -18,6 +18,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_PATH = os.path.join(PROJECT_ROOT, "data", "movies.json")
 STOPWORDS_PATH = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
 GOLDEN_DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "golden_dataset.json")
+BEAR_IMAGE_PATH = os.path.join(PROJECT_ROOT, "data", "paddington.jpg")
 
 CACHE_DIR = os.path.join(PROJECT_ROOT, "cache")
 
